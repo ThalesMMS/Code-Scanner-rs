@@ -1,0 +1,12 @@
+* text=auto eol=lf
+
+# Treat Rust sources as text with LF endings
+*.rs text
+
+# Configuration and docs
+*.toml text
+*.md text
+*.json text
+*.yml text
+*.yaml text
+*.sh text

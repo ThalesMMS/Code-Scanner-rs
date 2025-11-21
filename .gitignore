@@ -1,0 +1,19 @@
+# Build artifacts
+/target
+
+# Scanner outputs and local inputs
+/output/
+/input/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# IDE/editor
+.DS_Store
+.idea/
+.vscode/
+AGENTS.md
