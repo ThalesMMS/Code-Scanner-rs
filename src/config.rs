@@ -1,8 +1,18 @@
+//
+// config.rs
+// Code-Scanner-rs
+//
+// Manages scanning configuration, including defaults for file extensions, ignored directories, size limits, and merging optional project-specific overrides from .scanner-config.json.
+//
+// Thales Matheus Mendonça Santos - November 2025
+//
+
 use serde::Deserialize;
 use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 
+// Configuration model that dictates which files and directories are scanned.
 #[derive(Debug, Deserialize, Clone)]
 pub struct ProjectConfig {
     #[serde(default)]
@@ -20,6 +30,7 @@ pub struct ProjectConfig {
 impl Default for ProjectConfig {
     fn default() -> Self {
         Self {
+            // Languages and text-based formats we care about by default.
             code_extensions: HashSet::from(
                 [
                     // Web
@@ -63,6 +74,7 @@ impl Default for ProjectConfig {
                 ]
                 .map(|s| s.to_string()),
             ),
+            // Directories that usually contain build artefacts or dependencies.
             ignore_dirs: HashSet::from(
                 [
                     "node_modules",
@@ -86,6 +98,7 @@ impl Default for ProjectConfig {
                 ]
                 .map(|s| s.to_string()),
             ),
+            // High-churn lockfiles and platform files we rarely need in a code dump.
             ignore_files: HashSet::from(
                 [
                     ".ds_store",
@@ -99,6 +112,7 @@ impl Default for ProjectConfig {
                 ]
                 .map(|s| s.to_string()),
             ),
+            // Binary or heavy formats that should be skipped to keep reports lean.
             ignore_extensions: HashSet::from(
                 [
                     "png", "jpg", "jpeg", "gif", "ico", "svg", "woff", "woff2", "ttf", "eot",
@@ -107,12 +121,14 @@ impl Default for ProjectConfig {
                 ]
                 .map(|s| s.to_string()),
             ),
+            // Default 1MB cap to avoid dumping giant assets into the report.
             max_file_size: 1_048_576, // 1MB
         }
     }
 }
 
 impl ProjectConfig {
+    // Apply non-empty override fields while keeping defaults for everything else.
     pub fn apply_overrides(&mut self, overrides: ProjectConfig) {
         if !overrides.code_extensions.is_empty() {
             self.code_extensions = overrides.code_extensions;
@@ -133,6 +149,7 @@ impl ProjectConfig {
 }
 
 pub fn load_config(project_path: &Path) -> ProjectConfig {
+    // Start from defaults and merge optional .scanner-config.json overrides.
     let mut config = ProjectConfig::default();
     let config_path = project_path.join(".scanner-config.json");
 

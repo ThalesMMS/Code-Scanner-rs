@@ -1,3 +1,12 @@
+//
+// scanner.rs
+// Code-Scanner-rs
+//
+// Implements the scanning pipeline: builds directory walkers, filters files, writes tree structure and contents to reports, and aggregates scan statistics.
+//
+// Thales Matheus Mendonça Santos - November 2025
+//
+
 use crate::cli::Args;
 use crate::config::{load_config, ProjectConfig};
 use crate::project::detect_project_type;
@@ -10,6 +19,7 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+// Orchestrates a full scan for a single project and writes the report.
 pub fn process_project(project_path: &Path, output_dir: &Path, args: &Args) -> Result<()> {
     let project_name = project_path
         .file_name()
@@ -21,6 +31,7 @@ pub fn process_project(project_path: &Path, output_dir: &Path, args: &Args) -> R
     let project_type = detect_project_type(project_path);
     let config = load_config(project_path);
 
+    // Visible progress helps when scanning multiple folders.
     println!("📦 Processando: {} ({})", project_name, project_type);
 
     let mut output_file = File::create(&output_file_path).with_context(|| {
@@ -37,6 +48,7 @@ pub fn process_project(project_path: &Path, output_dir: &Path, args: &Args) -> R
         "═══════════════════════════════════════════════════════════════"
     )?;
 
+    // Walk the file system with the configured filters and collect files to dump.
     let walker = build_walker(project_path, args);
     let (mut valid_files, mut stats) =
         collect_files(project_path, &config, args, walker, &mut output_file)?;
@@ -56,6 +68,7 @@ pub fn process_project(project_path: &Path, output_dir: &Path, args: &Args) -> R
 }
 
 fn build_walker(project_path: &Path, args: &Args) -> Walk {
+    // Build a walker that respects .gitignore unless the user disabled it.
     WalkBuilder::new(project_path)
         .git_ignore(!args.no_gitignore)
         .hidden(false)
@@ -63,6 +76,7 @@ fn build_walker(project_path: &Path, args: &Args) -> Walk {
 }
 
 fn write_header(output_file: &mut File, project_name: &str, project_type: &str) -> Result<()> {
+    // Simple header for the human-friendly report.
     writeln!(
         output_file,
         "╔═══════════════════════════════════════════════════════════════╗"
@@ -90,10 +104,12 @@ fn collect_files(
 
     for result in walker {
         match result {
+            // ignore::Walk yields entries that can error; handle them gently.
             Ok(entry) => {
                 let path = entry.path();
 
                 if path == project_path {
+                    // Skip the root path itself; we only care about its children.
                     continue;
                 }
 
@@ -106,10 +122,12 @@ fn collect_files(
                     .to_lowercase();
 
                 if config.ignore_dirs.contains(&file_name) {
+                    // Prune entire directories early to avoid unnecessary work.
                     continue;
                 }
 
                 if path.is_dir() {
+                    // Log directory structure in the output file with indentation.
                     let depth = relative_path.components().count();
                     let indent = "  ".repeat(depth.saturating_sub(1));
                     writeln!(
@@ -122,6 +140,7 @@ fn collect_files(
                 }
 
                 if config.ignore_files.contains(&file_name) {
+                    // Skip noisy files but still count them as skipped for the summary.
                     stats.skipped += 1;
                     continue;
                 }
@@ -132,10 +151,13 @@ fn collect_files(
                     .unwrap_or_default();
 
                 if config.ignore_extensions.contains(&ext) {
+                    // Common binary or heavy files we do not want to dump.
                     stats.skipped += 1;
                     continue;
                 }
 
+                // If an extension exists and is not whitelisted, drop it unless the
+                // whole filename is explicitly whitelisted (Dockerfile, Makefile, etc).
                 if !ext.is_empty() && !config.code_extensions.contains(&ext) {
                     if !config.code_extensions.contains(&file_name) {
                         stats.skipped += 1;
@@ -148,6 +170,7 @@ fn collect_files(
                     Err(_) => continue,
                 };
 
+                // Enforce max file size to keep output manageable.
                 if metadata.len() > config.max_file_size {
                     if args.verbose {
                         println!("Ignorando {} (tamanho excessivo)", relative_path.display());
@@ -158,6 +181,7 @@ fn collect_files(
 
                 valid_files.push(path.to_path_buf());
 
+                // Record the file in the tree view with indentation to reflect depth.
                 let depth = relative_path.components().count();
                 let indent = "  ".repeat(depth.saturating_sub(1));
                 writeln!(
@@ -192,6 +216,7 @@ fn write_file_contents(
             .with_context(|| format!("Falha ao ler metadata de {}", relative_path.display()))?
             .len();
 
+        // Section header for each individual file.
         writeln!(
             output_file,
             "┌─────────────────────────────────────────────────────────────"
@@ -203,6 +228,7 @@ fn write_file_contents(
             "├─────────────────────────────────────────────────────────────"
         )?;
 
+        // Avoid dumping binary content which would clutter the report.
         if is_binary(path) {
             writeln!(
                 output_file,
@@ -211,6 +237,7 @@ fn write_file_contents(
         } else {
             match fs::read_to_string(path) {
                 Ok(content) => {
+                    // Include line numbers to make the output easy to reference.
                     for (i, line) in content.lines().enumerate() {
                         writeln!(output_file, "{:>4} │ {}", i + 1, line)?;
                     }
@@ -232,6 +259,7 @@ fn write_file_contents(
 }
 
 fn write_summary(output_file: &mut File, stats: &ScanStats, processed_count: usize) -> Result<()> {
+    // Final footer with a lightweight count of what happened.
     writeln!(
         output_file,
         "\n═══════════════════════════════════════════════════════════════"
@@ -260,6 +288,7 @@ fn write_summary(output_file: &mut File, stats: &ScanStats, processed_count: usi
 }
 
 #[derive(Default)]
+// Lightweight counters gathered during a scan.
 struct ScanStats {
     total_size: u64,
     skipped: u64,

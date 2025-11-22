@@ -1,5 +1,15 @@
+//
+// project.rs
+// Code-Scanner-rs
+//
+// Detects project types from manifest files and determines whether a path should be treated as a standalone project root before scanning.
+//
+// Thales Matheus Mendonça Santos - November 2025
+//
+
 use std::path::Path;
 
+// Infer a friendly project type name based on well-known manifest files.
 pub fn detect_project_type(path: &Path) -> String {
     if path.join("package.json").exists() {
         if path.join("next.config.js").exists() {
@@ -35,6 +45,8 @@ pub fn detect_project_type(path: &Path) -> String {
     "Genérico".to_string()
 }
 
+// Decide whether the provided path is already a single project root, so we avoid
+// recursing into child directories unnecessarily.
 pub fn is_single_project_root(path: &Path) -> bool {
     path.join("package.json").exists()
         || path.join("Cargo.toml").exists()

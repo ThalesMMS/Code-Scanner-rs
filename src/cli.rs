@@ -1,6 +1,16 @@
+//
+// cli.rs
+// Code-Scanner-rs
+//
+// Defines the command-line interface and arguments that control what gets scanned, where reports are written, and verbosity flags.
+//
+// Thales Matheus Mendonça Santos - November 2025
+//
+
 use clap::Parser;
 use std::path::PathBuf;
 
+/// Command-line interface definition for the code scanner.
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
