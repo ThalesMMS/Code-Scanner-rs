@@ -13,14 +13,14 @@ CLI that walks projects, lists relevant files, and generates a text report with 
 ## How to run
 ```bash
 # Default (uses ./input and ./output)
-cargo run -- --input ./input --output ./output
+cargo run -- --input-dir ./input --output-dir ./output
 
 # Verbose and ignoring the target project's .gitignore
-cargo run -- --input ./input --output ./output --verbose --no-gitignore
+cargo run -- --input-dir ./input --output-dir ./output --verbose --no-gitignore
 
 # Optimized binary
 cargo build --release
-./target/release/code_scanner --input ./input --output ./output
+./target/release/code_scanner --input-dir ./input --output-dir ./output
 ```
 
 ## Main arguments
