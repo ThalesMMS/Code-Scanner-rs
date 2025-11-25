@@ -1,9 +1,16 @@
 # Build artifacts
 /target
 
-# Scanner outputs and local inputs
-/output/
-/input/
+# Scanner inputs/outputs
+output/*
+!output/.gitkeep
+output_script/
+input/*
+!input/.gitkeep
+
+# Python caches
+/python/__pycache__/
+/python/scanner/__pycache__/
 
 # Logs and temp files
 *.log
@@ -12,8 +19,11 @@
 *.swo
 *~
 
-# IDE/editor
+# OS/IDE
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/
+
+# Misc
 AGENTS.md

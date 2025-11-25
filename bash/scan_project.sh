@@ -541,7 +541,7 @@ echo "   • IGNORE_ABSOLUTE_PATHS - Caminhos absolutos específicos a ignorar (
 echo
 
 echo "📌 Exemplos rápidos:"
-echo "   IGNORE_ABSOLUTE_PATHS=\"$PWD/input/vendor/symfony|$PWD/input/libs/huge\" ./scripts/scan_project.sh"
-echo "   IGNORE_PATHS=\"src/vendor/large-lib|tests/fixtures/big-data\" ./scripts/scan_project.sh"
-echo "   USE_GITIGNORE=false VERBOSE=true TARGET_DIR=./custom OUTPUT_DIR=./reports ./scripts/scan_project.sh"
+echo "   IGNORE_ABSOLUTE_PATHS=\"$PWD/input/vendor/symfony|$PWD/input/libs/huge\" ./bash/scan_project.sh"
+echo "   IGNORE_PATHS=\"src/vendor/large-lib|tests/fixtures/big-data\" ./bash/scan_project.sh"
+echo "   USE_GITIGNORE=false VERBOSE=true TARGET_DIR=./custom OUTPUT_DIR=./reports ./bash/scan_project.sh"
 echo
