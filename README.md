@@ -18,7 +18,7 @@ Toolkit with three independent scanners that produce text bundles of your code: 
 
 ## Quick start
 ```bash
-git clone <this-repo>
+git clone https://github.com/ThalesMMS/Code-Scanner.git
 cd Code-Scanner
 # Add the project(s) you want to inspect inside input/
 ```
