@@ -69,6 +69,7 @@ impl Default for ProjectConfig {
                     "bash",
                     "sql",
                     "txt",
+                    "tex",
                     "dockerfile",
                     "makefile",
                 ]
